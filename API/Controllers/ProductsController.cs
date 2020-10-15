@@ -9,6 +9,7 @@ using System.Linq;
 using AutoMapper;
 using API.Errors;
 using Microsoft.AspNetCore.Http;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -31,12 +32,20 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetProducts()
+        
+        public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
+            [FromQuery] ProductSpecParams productSpecParams )
         {
-            var spec = new ProductsWithBrandsAndTypesAndSpecification();
+            var spec = new ProductsWithBrandsAndTypesAndSpecification(productSpecParams);
+            var countSpec = new ProductsWithFilterCountSpecification(productSpecParams);
+
             var products = await _productRepo.ListAsync(spec);
+            var totalItems = await _productRepo.GetCountAsync(countSpec);
+
+            var data = _mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturnDto>>(products);
+
             
-            return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturnDto>>(products));
+            return Ok(new Pagination<ProductToReturnDto>(productSpecParams.PageIndex,productSpecParams.PageSize,totalItems,data));
         }
 
         [HttpGet("{id}")]
