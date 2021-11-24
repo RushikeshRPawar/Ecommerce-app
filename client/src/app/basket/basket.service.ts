@@ -37,6 +37,7 @@ constructor(private http: HttpClient) { }
         (response: IBasket) => {
           this.basketSource.next(response);
           this.calculateTotal();
+        // tslint:disable-next-line: no-shadowed-variable
         }, error => {
           console.log(error);
         }
@@ -79,6 +80,7 @@ constructor(private http: HttpClient) { }
         this.basketSource.next(null);
         this.basketTotalSource.next(null);
         localStorage.removeItem('basket_id');
+      // tslint:disable-next-line: no-shadowed-variable
       }, error => {
         console.log(error);
       }
